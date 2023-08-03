@@ -56,11 +56,23 @@ const getTransaction = (coin, txid, callback) => {
         .getTransaction(txid, callback)
 }
 
+const getBlock = (coin, hash, verbose, callback) => {
+
+    if (!walletConf[coin]) {
+        callback(`${coin} is not supported`) 
+        return
+    }
+
+    new RpcClient(walletConf[coin])
+        .getBlock(hash, verbose || false, callback)
+}
+
 module.exports = {
     getBlockHash,
     getBlockHeader,
     getInfo,
     getNewAddress,
+    getBlock,
     getTransaction
 }
 

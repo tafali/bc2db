@@ -187,7 +187,7 @@ RpcClient.callspec = {
     // getBalance: 'str int bool',
     // getBestBlockHash: '',
     // getBestChainLock: '',
-    // getBlock: 'str bool',
+    getBlock: 'str bool',
     // getBlockchainInfo: '',
     // getBlockCount: '',
     // getBlockHashes: 'int int',
@@ -312,6 +312,12 @@ function generateRPCMethods(constructor, apiCalls, rpc) {
                     id: getRandomId(),
                 });
             } else {
+                // console.table({
+                //     method: methodName,
+                //     params: slice(arguments, 0, arguments.length - 1),
+                //     id: getRandomId(),
+                // })
+
                 rpc.call(this, {
                     method: methodName,
                     params: slice(arguments, 0, arguments.length - 1),

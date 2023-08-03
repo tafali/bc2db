@@ -12,15 +12,16 @@ CREATE TABLE summary (
 );
 
 INSERT INTO summary(coin, lastrun) VALUES ('SAPP', NOW());
-/*
-CREATE TABLE sapp_block (
-    ID INTEGER PRIMARY KEY AUTOINCREMENT,
-    height INTEGER NOT NULL,
-    time INTEGER NOT NULL,
-    hash  VARCHAR(100) NOT NULL,
-    prevhash VARCHAR(100) NOT NULL
-);
 
+CREATE TABLE sapp_block (
+    ID INT NOT NULL AUTO_INCREMENT,
+    height INT NOT NULL,
+    time INT NOT NULL,
+    hash VARCHAR(100) NOT NULL,
+    prevhash VARCHAR(100) NOT NULL,
+    PRIMARY KEY (ID)
+);
+/*
 CREATE TABLE sapp_tx (
     ID INTEGER PRIMARY KEY AUTOINCREMENT,
     txid VARCHAR(100) NOT NULL,

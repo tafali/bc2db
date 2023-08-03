@@ -11,10 +11,11 @@ const coin = 'SAPP'
 wcommand.getInfo(coin, async (err, info) => {
   if (err) throw err;
 
-  console.log(coin + ' --> ' + JSON.stringify(info))
+  //console.log(coin + ' getInfo --> ' + JSON.stringify(info))
 
   if(info && info.result && info.result.blocks) {
-    console.log(info.result)
+    //console.log(info.result)
+
     db.query('UPDATE summary SET moneysupply=?, maxheight=?, lastrun=NOW() WHERE coin=?', 
             [Math.trunc(info.result.moneysupply), info.result.blocks, coin], 
       function (error, results, fields) {
@@ -23,6 +24,21 @@ wcommand.getInfo(coin, async (err, info) => {
       });
   }
 })
+
+db.query(`select max(height) m, (select maxheight from summary where coin = ?)-max(height) f from ${coin.toLowerCase()}_block`, [coin], function (error, results, fields) {
+  if (error) throw error;
+  
+  if(results[0].f > 0) {
+    const size = results[0].f < 15 ? results[0].f : 15;
+
+    for (let i = 1; i < size; i++) {
+      insertblock(coin, results[0].m*1 + i)
+    }    
+  } else if(results[0].m == null)
+    insertblock(coin, 1)
+});
+
+
 /*
 wcommand.getTransaction(coin, txid, async (err, txi) => {
   console.log(coin + ' --> ' + JSON.stringify(txi))
@@ -41,3 +57,31 @@ wcommand.getTransaction(coin, txid, async (err, txi) => {
 */
 
 //db.end();
+
+/************************************************  */
+
+async function insertblock(coin, height){
+  wcommand.getBlockHash(coin, height, async (err, info) => {
+    if (err) throw err;
+  
+    //console.log(coin + ' getBlockHash --> ' + JSON.stringify(info))
+  
+    const bhash = info.result;
+  
+    wcommand.getBlock(coin, bhash, true, async (err, info) => {
+      if (err) throw err;
+    
+      //console.log(coin + ' getBlock --> ' + JSON.stringify(info))
+    
+      if(info && info.result) {
+        //console.log(info.result)
+        db.query('INSERT INTO '+coin.toLowerCase()+'_block (height, time, hash, prevhash) VALUES (?,?,?,?)', 
+                [info.result.height, info.result.time, info.result.hash, info.result.previousblockhash], 
+          function (error, results, fields) {
+            if (error) throw error;
+            return;
+          });
+      }
+    })
+  })
+}
