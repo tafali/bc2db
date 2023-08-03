@@ -1,0 +1,49 @@
+CREATE DATABASE bc2db;
+CREATE USER 'bc2db'@'localhost' IDENTIFIED BY 'password';
+GRANT ALL PRIVILEGES ON 'bc2db'.* TO 'bc2db'@'localhost' WITH GRANT OPTION;
+
+CREATE TABLE summary (
+    ID INT NOT NULL AUTO_INCREMENT,
+    coin VARCHAR(10) NOT NULL,
+    maxheight INT NOT NULL DEFAULT 0,
+    moneysupply INT NOT NULL DEFAULT 0,
+    lastrun DATETIME,
+    PRIMARY KEY (ID)
+);
+
+INSERT INTO summary(coin, lastrun) VALUES ('SAPP', NOW());
+/*
+CREATE TABLE sapp_block (
+    ID INTEGER PRIMARY KEY AUTOINCREMENT,
+    height INTEGER NOT NULL,
+    time INTEGER NOT NULL,
+    hash  VARCHAR(100) NOT NULL,
+    prevhash VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE sapp_tx (
+    ID INTEGER PRIMARY KEY AUTOINCREMENT,
+    txid VARCHAR(100) NOT NULL,
+    blockhash VARCHAR(100) NOT NULL,
+    amount REAL NOT NULL,
+    blockindex INTEGER NOT NULL
+);
+
+CREATE TABLE sapp_tx_vin (
+    ID INTEGER PRIMARY KEY AUTOINCREMENT,
+    ttxid VARCHAR(100) NOT NULL,
+    txid VARCHAR(100) NOT NULL,
+    vout INTEGER NOT NULL
+);
+
+CREATE TABLE sapp_tx_vout (
+    ID INTEGER PRIMARY KEY AUTOINCREMENT,
+    ttxid VARCHAR(100) NOT NULL,
+    value REAL NOT NULL,
+    type VARCHAR(50) NOT NULL,
+    reqsigs INTEGER NOT NULL,
+    n INTEGER NOT NULL,
+    address VARCHAR(50) NOT NULL,
+    address2 VARCHAR(50) NOT NULL
+);
+*/

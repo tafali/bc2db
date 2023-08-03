@@ -1,0 +1,9 @@
+module.exports = {
+  SAPP: {
+    protocol: 'http',
+    host: 'localhost',
+    port: 18977,
+    user: 'user',
+    pass: 'pass'
+  }
+}
