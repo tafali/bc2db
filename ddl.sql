@@ -21,14 +21,16 @@ CREATE TABLE sapp_block (
     prevhash VARCHAR(100) NOT NULL,
     PRIMARY KEY (ID)
 );
-/*
+
 CREATE TABLE sapp_tx (
-    ID INTEGER PRIMARY KEY AUTOINCREMENT,
+    ID INT NOT NULL AUTO_INCREMENT,
+    height INT NOT NULL,
     txid VARCHAR(100) NOT NULL,
-    blockhash VARCHAR(100) NOT NULL,
-    amount REAL NOT NULL,
-    blockindex INTEGER NOT NULL
+    blockindex INT NOT NULL,
+    PRIMARY KEY (ID)
 );
+/*
+    amount DECIMAL(36,18),
 
 CREATE TABLE sapp_tx_vin (
     ID INTEGER PRIMARY KEY AUTOINCREMENT,

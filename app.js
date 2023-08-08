@@ -81,6 +81,16 @@ async function insertblock(coin, height){
             if (error) throw error;
             return;
           });
+
+          for(let i = 0; i < info.result.tx.length; i++) {
+            db.query('INSERT INTO '+coin.toLowerCase()+'_tx (height, txid, blockindex) VALUES (?,?,?)', 
+                    [info.result.height, info.result.tx[i], i], 
+              function (error, results, fields) {
+                if (error) throw error;
+                return;
+              });
+          }
+        
       }
     })
   })
