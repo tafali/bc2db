@@ -1,78 +1,82 @@
 const walletConf = require('../config/walletConf')
 const { RpcClient } = require('./rpc.service')
+const util = require("util"); 
 
-const getBlockHeader = (coin, hash, verbose, callback) => {
-
-    if (!walletConf[coin]) {
-        callback(`${coin} is not supported`) 
-        return
-    }
-
-    new RpcClient(walletConf[coin])
-        .getBlockHeader(hash, verbose || false, callback)
-}
-
-const getBlockHash = (coin, blockId, callback) => {
+const getRpcc = (coin) => {
 
     if (!walletConf[coin]) {
-        callback(`${coin} is not supported`) 
-        return
+        throw new Error(`${coin} is not supported`) 
     }
 
-    new RpcClient(walletConf[coin])
-        .getBlockHash(+blockId, callback)
-}
+    const rpcc = new RpcClient(walletConf[coin])
 
-const getInfo = (coin, callback) => {
-
-    if (!walletConf[coin]) {
-        callback(`${coin} is not supported`) 
-        return
+    function _getInfo(callback)  {
+        rpcc.getInfo(callback)
     }
 
-    new RpcClient(walletConf[coin])
-        .getInfo(callback)
-}
-
-const getNewAddress = (coin, callback) => {
-
-    if (!walletConf[coin]) {
-        callback(`${coin} is not supported`)
-        return
+    function _getBlockHeader(hash, verbose, callback) {
+        rpcc.getBlockHeader(hash, verbose || false, callback)
     }
-
-    new RpcClient(walletConf[coin])
-        .getNewAddress(callback)
-}
-
-const getTransaction = (coin, txid, callback) => {
-
-    if (!walletConf[coin]) {
-        callback(`${coin} is not supported`) 
-        return
+    
+    function _getBlockHash(blockId, callback) {
+        rpcc.getBlockHash(+blockId, callback)
     }
-
-    new RpcClient(walletConf[coin])
-        .getTransaction(txid, callback)
-}
-
-const getBlock = (coin, hash, verbose, callback) => {
-
-    if (!walletConf[coin]) {
-        callback(`${coin} is not supported`) 
-        return
+    
+    function _getNewAddress(callback) {
+        rpcc.getNewAddress(callback)
     }
+    
+    function _getTransaction(txid, callback) {
+        rpcc.getTransaction(txid, callback)
+    }
+    
+    function _getBlock(hash, verbose, callback) {
+        rpcc.getBlock(hash, verbose || false, callback)
+    }
+    
+    const getInfo = util.promisify(_getInfo).bind(this)
+    const getBlockHeader = util.promisify(_getBlockHeader).bind(this)
+    const getBlockHash = util.promisify(_getBlockHash).bind(this)
+    const getNewAddress = util.promisify(_getNewAddress).bind(this)
+    const getTransaction = util.promisify(_getTransaction).bind(this)
+    const getBlock = util.promisify(_getBlock).bind(this)
 
-    new RpcClient(walletConf[coin])
-        .getBlock(hash, verbose || false, callback)
+    return {
+        getBlockHeader: async (hash, verbose) => {
+            const summ = await getBlockHeader(hash, verbose || false).catch(err => { throw err });
+            return summ
+        },
+        
+        getBlockHash: async (blockId) => {
+            const summ = await getBlockHash(+blockId).catch(err => { throw err });
+            return summ
+        },
+        
+        getInfo: async () => {
+            const summ = await getInfo().catch(err => { throw err });
+            return summ
+        },
+
+        getNewAddress: async () => {
+            const summ = await getNewAddress().catch(err => { throw err });
+            return summ
+        },
+        
+        getTransaction: async (txid) => {
+            const summ = await getTransaction(txid).catch(err => { throw err });
+            return summ
+        },
+        
+        getBlock: async (hash, verbose) => {
+            const summ = await getBlock(hash, verbose || false).catch(err => { throw err });
+            return summ
+        }
+    }
 }
+
+
 
 module.exports = {
-    getBlockHash,
-    getBlockHeader,
-    getInfo,
-    getNewAddress,
-    getBlock,
-    getTransaction
+    getRpcc
 }
 

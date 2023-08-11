@@ -2,6 +2,15 @@ const http = require('http')
 const https = require('https')
 const async = require('async')
 
+const cl = console.log.bind(console);
+const noop = function () {};
+const slice = function (arr, start, end) {
+    return Array.prototype.slice.call(arr, start, end);
+};
+function getRandomId() {
+    return parseInt(Math.random() * 100000);
+}
+
 function RpcClient({ host = '127.0.0.1', port = 9998, user = 'user', pass = 'pass', protocol = 'http', rejectUnauthorized = false }) {
     this.host = host
     this.port = port
@@ -26,10 +35,6 @@ function RpcClient({ host = '127.0.0.1', port = 9998, user = 'user', pass = 'pas
     }, queueSize);
 }
 
-const cl = console.log.bind(console);
-
-const noop = function () {
-};
 
 RpcClient.loggers = {
     none: {
@@ -59,6 +64,7 @@ function rpc(request, callback) {
 
     this.queue.push(task);
 }
+
 function innerRpc(request, callback) {
     const self = this;
     request = JSON.stringify(request);
@@ -285,10 +291,6 @@ RpcClient.callspec = {
     // getUser: 'str',
 };
 
-const slice = function (arr, start, end) {
-    return Array.prototype.slice.call(arr, start, end);
-};
-
 function generateRPCMethods(constructor, apiCalls, rpc) {
     function createRPCMethod(methodName, argMap) {
         return function () {
@@ -370,10 +372,6 @@ function generateRPCMethods(constructor, apiCalls, rpc) {
     }
 
     constructor.prototype.apiCalls = apiCalls;
-}
-
-function getRandomId() {
-    return parseInt(Math.random() * 100000);
 }
 
 generateRPCMethods(RpcClient, RpcClient.callspec, rpc);

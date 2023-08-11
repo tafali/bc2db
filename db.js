@@ -1,10 +1,12 @@
 const mysql      = require('mysql');
 const util = require("util"); 
 
+require('dotenv').config();
+
 const connection = mysql.createConnection({
   host     : 'localhost',
   user     : 'bc2db',
-  password : 'password',
+  password : process.env.DBPASS,
   database : 'bc2db'
 });
 

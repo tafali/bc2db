@@ -1,9 +1,11 @@
 const dbutil = require('./dbutil')
-const wcommand = require('./services/walletCommands')
-
-dbutil.listSummary()
+const walletutil = require('./walletutil')
 
 const coin = 'SAPP'
+const sappRpcc = walletutil.getRppc(coin);
+
+dbutil.listSummary()
+walletutil.printInfo(sappRpcc)
 
 // wcommand.getInfo(coin, async (err, info) => {
 //   if (err) throw err;
