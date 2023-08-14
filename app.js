@@ -1,41 +1,35 @@
 const dbutil = require('./dbutil')
-const walletutil = require('./walletutil')
+const walletutil = require('./walletutil');
 
-const coin = 'SAPP'
-const sappRpcc = walletutil.getRppc(coin);
+async function process(coin){
+    const rpcc = await walletutil.getRppc(coin);
 
-dbutil.listSummary()
-walletutil.printInfo(sappRpcc)
+    await dbutil.listSummary()
+    let lastblk = await walletutil.getInfo(rpcc)
 
-// wcommand.getInfo(coin, async (err, info) => {
-//   if (err) throw err;
+    if (!lastblk){
+        console.error("Blok bilgisi yok")
+        return
+    }
 
-//   //console.log(coin + ' getInfo --> ' + JSON.stringify(info))
+    await dbutil.updateSummary(lastblk.moneysupply, lastblk.blocks, coin)
 
-//   if(info && info.result && info.result.blocks) {
-//     //console.log(info.result)
+    let diff = await dbutil.getDiff(coin)
+    //console.table(diff)
 
-//     db.query('UPDATE summary SET moneysupply=?, maxheight=?, lastrun=NOW() WHERE coin=?', 
-//             [Math.trunc(info.result.moneysupply), info.result.blocks, coin], 
-//       function (error, results, fields) {
-//         if (error) throw error;
-//         return;
-//       });
-//   }
-// })
+    if(diff[0].f > 0) {
+        const size = diff[0].f < 15 ? diff[0].f : 15;
 
-// db.query(`select max(height) m, (select maxheight from summary where coin = ?)-max(height) f from ${coin.toLowerCase()}_block`, [coin], function (error, results, fields) {
-//   if (error) throw error;
-  
-//   if(results[0].f > 0) {
-//     const size = results[0].f < 15 ? results[0].f : 15;
+        for (let i = 1; i < size; i++) {
+            await insertblock(rpcc, coin, diff[0].m*1 + i)
+        }    
+    } else if(diff[0].m == null)
+        await insertblock(rpcc, coin, 1)
+ 
+}
 
-//     for (let i = 1; i < size; i++) {
-//       insertblock(coin, results[0].m*1 + i)
-//     }    
-//   } else if(results[0].m == null)
-//     insertblock(coin, 1)
-// });
+
+process('SAPP')
 
 
 // /*
@@ -59,38 +53,18 @@ walletutil.printInfo(sappRpcc)
 
 // /************************************************  */
 
-// async function insertblock(coin, height){
-//   wcommand.getBlockHash(coin, height, async (err, info) => {
-//     if (err) throw err;
-  
-//     //console.log(coin + ' getBlockHash --> ' + JSON.stringify(info))
-  
-//     const bhash = info.result;
-  
-//     wcommand.getBlock(coin, bhash, true, async (err, info) => {
-//       if (err) throw err;
-    
-//       //console.log(coin + ' getBlock --> ' + JSON.stringify(info))
-    
-//       if(info && info.result) {
-//         //console.log(info.result)
-//         db.query('INSERT INTO '+coin.toLowerCase()+'_block (height, time, hash, prevhash) VALUES (?,?,?,?)', 
-//                 [info.result.height, info.result.time, info.result.hash, info.result.previousblockhash], 
-//           function (error, results, fields) {
-//             if (error) throw error;
-//             return;
-//           });
+async function insertblock(rpcc, coin, height){
 
-//           for(let i = 0; i < info.result.tx.length; i++) {
-//             db.query('INSERT INTO '+coin.toLowerCase()+'_tx (height, txid, blockindex) VALUES (?,?,?)', 
-//                     [info.result.height, info.result.tx[i], i], 
-//               function (error, results, fields) {
-//                 if (error) throw error;
-//                 return;
-//               });
-//           }
-        
-//       }
-//     })
-//   })
-// }
+    let bhash = await walletutil.getBlockHash(rpcc, height);
+    //console.table(bhash)
+
+    let blk = await walletutil.getBlock(rpcc, bhash, true);
+
+    if(blk) {
+        await dbutil.insertBlock(coin, blk.height, blk.time, blk.hash, blk.previousblockhash)
+
+        for(let i = 0; i < blk.tx.length; i++) {
+            await dbutil.insertTx(coin, blk.height, blk.tx[i], i)
+        }
+    } 
+}
